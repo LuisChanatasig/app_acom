@@ -46,8 +46,13 @@ class BiometricService {
           : BiometricResult.failed;
 
     } on PlatformException catch (e) {
-      if (e.code == 'NotEnrolled') return BiometricResult.notEnrolled;
-      if (e.code == 'LockedOut')   return BiometricResult.lockedOut;
+      print('🔐 Biometric error code: ${e.code}');
+      print('🔐 Biometric error msg: ${e.message}');
+      if (e.code == 'NotEnrolled')       return BiometricResult.notEnrolled;
+      if (e.code == 'notEnrolled')       return BiometricResult.notEnrolled;
+      if (e.code == 'LockedOut')         return BiometricResult.lockedOut;
+      if (e.code == 'PermanentlyLockedOut') return BiometricResult.lockedOut;
+      if (e.code == 'NotAvailable')      return BiometricResult.notAvailable;
       return BiometricResult.error;
     }
   }

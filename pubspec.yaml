@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.11.1
+  sdk: ^3.0.0
 
 dependencies:
   flutter:
@@ -13,7 +13,12 @@ dependencies:
   provider: ^6.0.5
   flutter_dotenv: ^5.1.0
   cupertino_icons: ^1.0.8
-  local_auth: ^2.3.0 
+  local_auth: ^2.3.0
+  flutter_local_notifications: ^17.2.2
+  timezone: ^0.9.4
+  shared_preferences: ^2.3.2
+  permission_handler: ^11.3.1
+  just_audio: ^0.9.40
 
 dev_dependencies:
   flutter_test:
@@ -33,3 +38,11 @@ flutter:
   uses-material-design: true
   assets:
     - assets/logo.png
+    - assets/sounds/rain.mp3
+    - assets/sounds/ocean.mp3
+    - assets/sounds/forest.mp3
+    - assets/sounds/fire.mp3
+    - assets/sounds/wind.mp3
+    - assets/sounds/cafe.mp3
+    - assets/sounds/tibetan.mp3
+    - assets/sounds/white.mp3

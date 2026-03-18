@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:math' as math;
-import 'chat_screen.dart'; // crea esta pantalla después
+import 'chat_screen.dart';
+import 'breathing_screen.dart';
+import 'diary_screen.dart';
+import 'notifications_screen.dart';
+import 'profile_screen.dart';
+import 'sounds_screen.dart';
 
 // ─────────────────────────────────────────────
 // Modelos de datos locales
@@ -38,24 +42,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
-  // Animaciones de entrada
   late AnimationController _entryController;
   late Animation<double> _headerFade;
   late Animation<double> _cardsFade;
   late Animation<Offset> _headerSlide;
   late Animation<Offset> _cardsSlide;
 
-  // Float del robot
   late AnimationController _floatController;
   late Animation<double> _floatAnim;
 
-  // Mood seleccionado
   int? _selectedMood;
-
-  // Página del bottom nav
   int _navIndex = 0;
 
-  // Datos de ejemplo
   final String _userName = 'Fernando';
   final List<_MoodOption> _moods = const [
     _MoodOption(emoji: '😊', label: 'Genial',    color: Color(0xFF66BB6A)),
@@ -86,7 +84,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     ),
   ];
 
-  // Stats de ejemplo
   final List<double> _weekStats = [0.6, 0.8, 0.5, 0.9, 0.7, 0.85, 0.75];
   final List<String> _weekDays  = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
@@ -148,7 +145,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return '🌙';
   }
 
-  // ── Build ──────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -159,71 +155,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         body: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
-            // ── Header ──
             SliverToBoxAdapter(child: _buildHeader()),
-
-            // ── Mood card ──
             SliverToBoxAdapter(
               child: FadeTransition(
                 opacity: _cardsFade,
-                child: SlideTransition(
-                  position: _cardsSlide,
-                  child: _buildMoodCard(),
-                ),
+                child: SlideTransition(position: _cardsSlide, child: _buildMoodCard()),
               ),
             ),
-
-            // ── Quick actions ──
             SliverToBoxAdapter(
               child: FadeTransition(
                 opacity: _cardsFade,
-                child: SlideTransition(
-                  position: _cardsSlide,
-                  child: _buildQuickActions(),
-                ),
+                child: SlideTransition(position: _cardsSlide, child: _buildQuickActions()),
               ),
             ),
-
-            // ── Weekly stats ──
             SliverToBoxAdapter(
               child: FadeTransition(
                 opacity: _cardsFade,
-                child: SlideTransition(
-                  position: _cardsSlide,
-                  child: _buildWeekStats(),
-                ),
+                child: SlideTransition(position: _cardsSlide, child: _buildWeekStats()),
               ),
             ),
-
-            // ── Recent conversations ──
             SliverToBoxAdapter(
               child: FadeTransition(
                 opacity: _cardsFade,
-                child: SlideTransition(
-                  position: _cardsSlide,
-                  child: _buildConversations(),
-                ),
+                child: SlideTransition(position: _cardsSlide, child: _buildConversations()),
               ),
             ),
-
-            // Bottom padding for nav bar
             const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         ),
-
-        // ── Bottom nav ──
         bottomNavigationBar: _buildBottomNav(),
-
-        // ── FAB ──
         floatingActionButton: _buildFAB(),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
     );
   }
 
-  // ─────────────────────────────────────────────
-  // Header con robot
-  // ─────────────────────────────────────────────
   Widget _buildHeader() {
     return FadeTransition(
       opacity: _headerFade,
@@ -246,73 +212,66 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Top bar
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Avatar
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.2),
-                          border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
-                        ),
-                        child: const Icon(Icons.person_rounded, color: Colors.white, size: 22),
-                      ),
-
-                      // Notificaciones
-                      Stack(
-                        children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.15),
-                            ),
-                            child: const Icon(Icons.notifications_outlined,
-                                color: Colors.white, size: 22),
+                      // Avatar → navega al perfil
+                      GestureDetector(
+                        onTap: _goToProfile,
+                        child: Container(
+                          width: 42, height: 42,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.2),
+                            border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
                           ),
-                          Positioned(
-                            top: 8, right: 8,
-                            child: Container(
-                              width: 9, height: 9,
-                              decoration: const BoxDecoration(
+                          child: const Icon(Icons.person_rounded, color: Colors.white, size: 22),
+                        ),
+                      ),
+                      // Notificaciones
+                      GestureDetector(
+                        onTap: _goToNotifications,
+                        child: Stack(
+                          children: [
+                            Container(
+                              width: 42, height: 42,
+                              decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Color(0xFFFF6B6B),
+                                color: Colors.white.withOpacity(0.15),
+                              ),
+                              child: const Icon(Icons.notifications_outlined, color: Colors.white, size: 22),
+                            ),
+                            Positioned(
+                              top: 8, right: 8,
+                              child: Container(
+                                width: 9, height: 9,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Color(0xFFFF6B6B),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 20),
-
-                  // Saludo + robot
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      // Texto
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Text(
-                                  '$_greeting $_greetingEmoji',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white.withOpacity(0.8),
-                                    fontWeight: FontWeight.w400,
-                                    letterSpacing: 0.3,
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              '$_greeting $_greetingEmoji',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withOpacity(0.8),
+                                fontWeight: FontWeight.w400,
+                                letterSpacing: 0.3,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -330,25 +289,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.18),
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                    color: Colors.white.withOpacity(0.25), width: 1),
+                                border: Border.all(color: Colors.white.withOpacity(0.25), width: 1),
                               ),
                               child: const Text(
                                 '¿Cómo te sientes hoy?',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w500),
                               ),
                             ),
                           ],
                         ),
                       ),
-
                       const SizedBox(width: 12),
-
-                      // Robot flotando
                       AnimatedBuilder(
                         animation: _floatAnim,
                         builder: (_, child) => Transform.translate(
@@ -360,19 +311,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              // Halo pulsante
                               Container(
-                                width: 100,
-                                height: 100,
+                                width: 100, height: 100,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Colors.white.withOpacity(0.1),
                                 ),
                               ),
-                              // Logo
                               Container(
-                                width: 82,
-                                height: 82,
+                                width: 82, height: 82,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Colors.white,
@@ -391,7 +338,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   ),
                                 ),
                               ),
-                              // Badge "Tócame"
                               Positioned(
                                 bottom: 4,
                                 child: Container(
@@ -399,20 +345,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF29B6F6),
                                     borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        blurRadius: 6,
-                                      ),
-                                    ],
+                                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 6)],
                                   ),
                                   child: const Text(
                                     '¡Chatea! 💬',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                    style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.w700),
                                   ),
                                 ),
                               ),
@@ -431,9 +368,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // Mood card
-  // ─────────────────────────────────────────────
   Widget _buildMoodCard() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -449,17 +383,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     color: const Color(0xFFE3F2FD),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.favorite_rounded,
-                      color: Color(0xFF1976D2), size: 18),
+                  child: const Icon(Icons.favorite_rounded, color: Color(0xFF1976D2), size: 18),
                 ),
                 const SizedBox(width: 10),
                 const Text(
                   '¿Cómo te sientes ahora?',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF0D47A1),
-                  ),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF0D47A1)),
                 ),
               ],
             ),
@@ -488,12 +417,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                     child: Column(
                       children: [
-                        Text(
-                          m.emoji,
-                          style: TextStyle(
-                            fontSize: selected ? 30 : 26,
-                          ),
-                        ),
+                        Text(m.emoji, style: TextStyle(fontSize: selected ? 30 : 26)),
                         const SizedBox(height: 4),
                         Text(
                           m.label,
@@ -530,15 +454,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     children: [
                       Text(
                         'Cuéntame más ${_moods[_selectedMood!].emoji}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),
                       ),
                       const SizedBox(width: 8),
-                      const Icon(Icons.arrow_forward_rounded,
-                          color: Colors.white, size: 16),
+                      const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 16),
                     ],
                   ),
                 ),
@@ -550,15 +469,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // Quick actions
-  // ─────────────────────────────────────────────
   Widget _buildQuickActions() {
     final actions = [
-      _QuickAction(icon: Icons.chat_bubble_rounded,    label: 'Nuevo\nchat',     color: const Color(0xFF1976D2), onTap: _goToChat),
-      _QuickAction(icon: Icons.self_improvement_rounded, label: 'Respirar',       color: const Color(0xFF26A69A), onTap: () => _showSnack('🧘 Ejercicio de respiración próximamente')),
-      _QuickAction(icon: Icons.book_rounded,           label: 'Mi\ndiario',       color: const Color(0xFFF57C00), onTap: () => _showSnack('📓 Diario próximamente')),
-      _QuickAction(icon: Icons.insights_rounded,       label: 'Mi\nprogreso',    color: const Color(0xFF7B1FA2), onTap: () => _showSnack('📊 Estadísticas próximamente')),
+      _QuickAction(icon: Icons.chat_bubble_rounded,      label: 'Nuevo\nchat',  color: const Color(0xFF1976D2), onTap: _goToChat),
+      _QuickAction(icon: Icons.self_improvement_rounded, label: 'Respirar',     color: const Color(0xFF26A69A), onTap: _goToBreathing),
+      _QuickAction(icon: Icons.music_note_rounded,       label: 'Sonidos',      color: const Color(0xFF6A1B9A), onTap: _goToSounds),
+      _QuickAction(icon: Icons.book_rounded,             label: 'Mi\ndiario',   color: const Color(0xFFF57C00), onTap: _goToDiary),
     ];
 
     return Padding(
@@ -581,9 +497,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // Weekly stats
-  // ─────────────────────────────────────────────
   Widget _buildWeekStats() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -599,18 +512,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     color: const Color(0xFFF3E5F5),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.insights_rounded,
-                      color: Color(0xFF7B1FA2), size: 18),
+                  child: const Icon(Icons.insights_rounded, color: Color(0xFF7B1FA2), size: 18),
                 ),
                 const SizedBox(width: 10),
                 const Expanded(
                   child: Text(
                     'Tu semana emocional',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF0D47A1),
-                    ),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF0D47A1)),
                   ),
                 ),
                 Container(
@@ -621,11 +529,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                   child: const Text(
                     '↑ 12%',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF388E3C),
-                    ),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF388E3C)),
                   ),
                 ),
               ],
@@ -638,11 +542,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: List.generate(_weekStats.length, (i) {
                   final isToday = i == DateTime.now().weekday - 1;
-                  return _Bar(
-                    value: _weekStats[i],
-                    day: _weekDays[i],
-                    isToday: isToday,
-                  );
+                  return _Bar(value: _weekStats[i], day: _weekDays[i], isToday: isToday);
                 }),
               ),
             ),
@@ -653,18 +553,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 color: const Color(0xFFE8F5E9),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Row(
+              child: const Row(
                 children: [
-                  const Text('🌟', style: TextStyle(fontSize: 18)),
-                  const SizedBox(width: 10),
-                  const Expanded(
+                  Text('🌟', style: TextStyle(fontSize: 18)),
+                  SizedBox(width: 10),
+                  Expanded(
                     child: Text(
                       '¡Tu bienestar mejoró esta semana! Sigue así.',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF2E7D32),
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: TextStyle(fontSize: 13, color: Color(0xFF2E7D32), fontWeight: FontWeight.w500),
                     ),
                   ),
                 ],
@@ -676,9 +572,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // Conversaciones recientes
-  // ─────────────────────────────────────────────
   Widget _buildConversations() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -691,24 +584,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               const _SectionHeader(title: 'Conversaciones recientes'),
               TextButton(
                 onPressed: () => _showSnack('Ver todas próximamente'),
-                child: const Text('Ver todas',
-                    style: TextStyle(color: Color(0xFF1976D2), fontSize: 13)),
+                child: const Text('Ver todas', style: TextStyle(color: Color(0xFF1976D2), fontSize: 13)),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          ..._conversations.map((c) => _ConversationTile(
-            conv: c,
-            onTap: _goToChat,
-          )),
+          ..._conversations.map((c) => _ConversationTile(conv: c, onTap: _goToChat)),
         ],
       ),
     );
   }
 
-  // ─────────────────────────────────────────────
-  // Bottom nav
-  // ─────────────────────────────────────────────
   Widget _buildBottomNav() {
     return Container(
       decoration: BoxDecoration(
@@ -729,11 +615,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _NavItem(icon: Icons.home_rounded,          label: 'Inicio',     index: 0, current: _navIndex, onTap: (i) => setState(() => _navIndex = i)),
-              _NavItem(icon: Icons.chat_bubble_rounded,   label: 'Chat',       index: 1, current: _navIndex, onTap: (i) { setState(() => _navIndex = i); _goToChat(); }),
-              const SizedBox(width: 56), // espacio para FAB
-              _NavItem(icon: Icons.bar_chart_rounded,     label: 'Progreso',   index: 2, current: _navIndex, onTap: (i) => setState(() => _navIndex = i)),
-              _NavItem(icon: Icons.settings_rounded,      label: 'Ajustes',    index: 3, current: _navIndex, onTap: (i) => setState(() => _navIndex = i)),
+              _NavItem(icon: Icons.home_rounded,        label: 'Inicio',   index: 0, current: _navIndex, onTap: (i) => setState(() => _navIndex = i)),
+              _NavItem(icon: Icons.chat_bubble_rounded, label: 'Chat',     index: 1, current: _navIndex, onTap: (i) { setState(() => _navIndex = i); _goToChat(); }),
+              const SizedBox(width: 56),
+              _NavItem(icon: Icons.notifications_rounded, label: 'Avisos', index: 2, current: _navIndex, onTap: (i) { setState(() => _navIndex = i); _goToNotifications(); }),
+              _NavItem(icon: Icons.person_rounded,      label: 'Perfil',   index: 3, current: _navIndex, onTap: (i) { setState(() => _navIndex = i); _goToProfile(); }),
             ],
           ),
         ),
@@ -741,15 +627,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ─────────────────────────────────────────────
-  // FAB central
-  // ─────────────────────────────────────────────
   Widget _buildFAB() {
     return GestureDetector(
       onTap: _goToChat,
       child: Container(
-        width: 62,
-        height: 62,
+        width: 62, height: 62,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: const LinearGradient(
@@ -775,45 +657,97 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ── Helpers ───────────────────────────────
+  // ── Navegación ────────────────────────────
   void _goToChat() {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 400),
-        pageBuilder: (_, _, _) => const ChatScreen(),
-        transitionsBuilder: (_, anim, _, child) => SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 1),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
-          child: child,
-        ),
+    Navigator.push(context, PageRouteBuilder(
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (c, a, s) => const ChatScreen(),
+      transitionsBuilder: (c, a, s, child) => SlideTransition(
+        position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+            .animate(CurvedAnimation(parent: a, curve: Curves.easeOutCubic)),
+        child: child,
       ),
-    );
+    ));
+  }
+
+  void _goToBreathing() {
+    Navigator.push(context, PageRouteBuilder(
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (c, a, s) => const BreathingScreen(),
+      transitionsBuilder: (c, a, s, child) => SlideTransition(
+        position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+            .animate(CurvedAnimation(parent: a, curve: Curves.easeOutCubic)),
+        child: child,
+      ),
+    ));
+  }
+
+  void _goToDiary() {
+    Navigator.push(context, PageRouteBuilder(
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (c, a, s) => const DiaryScreen(),
+      transitionsBuilder: (c, a, s, child) => SlideTransition(
+        position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+            .animate(CurvedAnimation(parent: a, curve: Curves.easeOutCubic)),
+        child: child,
+      ),
+    ));
+  }
+
+  void _goToNotifications() {
+    Navigator.push(context, PageRouteBuilder(
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (c, a, s) => const NotificationsScreen(),
+      transitionsBuilder: (c, a, s, child) => SlideTransition(
+        position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+            .animate(CurvedAnimation(parent: a, curve: Curves.easeOutCubic)),
+        child: child,
+      ),
+    ));
+  }
+
+  void _goToProfile() {
+    Navigator.push(context, PageRouteBuilder(
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (c, a, s) => const ProfileScreen(),
+      transitionsBuilder: (c, a, s, child) => SlideTransition(
+        position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+            .animate(CurvedAnimation(parent: a, curve: Curves.easeOutCubic)),
+        child: child,
+      ),
+    ));
+  }
+
+  void _goToSounds() {
+    Navigator.push(context, PageRouteBuilder(
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (c, a, s) => SoundsScreen(),
+      transitionsBuilder: (c, a, s, child) => SlideTransition(
+        position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+            .animate(CurvedAnimation(parent: a, curve: Curves.easeOutCubic)),
+        child: child,
+      ),
+    ));
   }
 
   void _showSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg, style: const TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF1565C0),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg, style: const TextStyle(color: Colors.white)),
+      backgroundColor: const Color(0xFF1565C0),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      duration: const Duration(seconds: 2),
+    ));
   }
 }
 
 // ─────────────────────────────────────────────
-// Sub-widgets reutilizables
+// Sub-widgets
 // ─────────────────────────────────────────────
 
 class _Card extends StatelessWidget {
   final Widget child;
   const _Card({required this.child});
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -822,13 +756,7 @@ class _Card extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1976D2).withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: const Color(0xFF1976D2).withOpacity(0.08), blurRadius: 20, offset: const Offset(0, 4))],
       ),
       child: child,
     );
@@ -838,21 +766,12 @@ class _Card extends StatelessWidget {
 class _SectionHeader extends StatelessWidget {
   final String title;
   const _SectionHeader({required this.title});
-
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w800,
-        color: Color(0xFF0D47A1),
-      ),
-    );
+    return Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF0D47A1)));
   }
 }
 
-// ── Quick action ──────────────────────────────
 class _QuickAction {
   final IconData icon;
   final String label;
@@ -864,7 +783,6 @@ class _QuickAction {
 class _QuickActionBtn extends StatelessWidget {
   final _QuickAction action;
   const _QuickActionBtn({required this.action});
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -874,35 +792,19 @@ class _QuickActionBtn extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: action.color.withOpacity(0.12),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: action.color.withOpacity(0.12), blurRadius: 12, offset: const Offset(0, 4))],
         ),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: action.color.withOpacity(0.12),
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: action.color.withOpacity(0.12), shape: BoxShape.circle),
               child: Icon(action.icon, color: action.color, size: 22),
             ),
             const SizedBox(height: 8),
-            Text(
-              action.label,
+            Text(action.label,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: action.color,
-                height: 1.2,
-              ),
-            ),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: action.color, height: 1.2)),
           ],
         ),
       ),
@@ -910,13 +812,11 @@ class _QuickActionBtn extends StatelessWidget {
   }
 }
 
-// ── Bar chart ─────────────────────────────────
 class _Bar extends StatelessWidget {
   final double value;
   final String day;
   final bool isToday;
   const _Bar({required this.value, required this.day, required this.isToday});
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -928,48 +828,30 @@ class _Bar extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             gradient: isToday
-                ? const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFF1565C0), Color(0xFF29B6F6)],
-                  )
-                : LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      const Color(0xFF90CAF9).withOpacity(0.6),
-                      const Color(0xFFBBDEFB).withOpacity(0.4),
-                    ],
-                  ),
+                ? const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                    colors: [Color(0xFF1565C0), Color(0xFF29B6F6)])
+                : LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                    colors: [const Color(0xFF90CAF9).withOpacity(0.6), const Color(0xFFBBDEFB).withOpacity(0.4)]),
             boxShadow: isToday
-                ? [BoxShadow(
-                    color: const Color(0xFF1976D2).withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  )]
+                ? [BoxShadow(color: const Color(0xFF1976D2).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))]
                 : [],
           ),
         ),
         const SizedBox(height: 6),
-        Text(
-          day,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: isToday ? FontWeight.w800 : FontWeight.w400,
-            color: isToday ? const Color(0xFF1565C0) : const Color(0xFF90A4AE),
-          ),
-        ),
+        Text(day, style: TextStyle(
+          fontSize: 11,
+          fontWeight: isToday ? FontWeight.w800 : FontWeight.w400,
+          color: isToday ? const Color(0xFF1565C0) : const Color(0xFF90A4AE),
+        )),
       ],
     );
   }
 }
 
-// ── Conversation tile ─────────────────────────
 class _ConversationTile extends StatelessWidget {
   final _Conversation conv;
   final VoidCallback onTap;
   const _ConversationTile({required this.conv, required this.onTap});
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -980,52 +862,24 @@ class _ConversationTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF1976D2).withOpacity(0.07),
-              blurRadius: 12,
-              offset: const Offset(0, 3),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: const Color(0xFF1976D2).withOpacity(0.07), blurRadius: 12, offset: const Offset(0, 3))],
         ),
         child: Row(
           children: [
-            // Emoji bubble
             Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE3F2FD),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Center(
-                child: Text(conv.emoji, style: const TextStyle(fontSize: 22)),
-              ),
+              width: 46, height: 46,
+              decoration: BoxDecoration(color: const Color(0xFFE3F2FD), borderRadius: BorderRadius.circular(14)),
+              child: Center(child: Text(conv.emoji, style: const TextStyle(fontSize: 22))),
             ),
             const SizedBox(width: 12),
-            // Text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    conv.title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF0D47A1),
-                    ),
-                  ),
+                  Text(conv.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF0D47A1))),
                   const SizedBox(height: 3),
-                  Text(
-                    conv.preview,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF90A4AE),
-                    ),
-                  ),
+                  Text(conv.preview, maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF90A4AE))),
                 ],
               ),
             ),
@@ -1033,13 +887,9 @@ class _ConversationTile extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  conv.time,
-                  style: const TextStyle(fontSize: 11, color: Color(0xFFB0BEC5)),
-                ),
+                Text(conv.time, style: const TextStyle(fontSize: 11, color: Color(0xFFB0BEC5))),
                 const SizedBox(height: 6),
-                const Icon(Icons.arrow_forward_ios_rounded,
-                    size: 13, color: Color(0xFFCFD8DC)),
+                const Icon(Icons.arrow_forward_ios_rounded, size: 13, color: Color(0xFFCFD8DC)),
               ],
             ),
           ],
@@ -1049,18 +899,13 @@ class _ConversationTile extends StatelessWidget {
   }
 }
 
-// ── Nav item ──────────────────────────────────
 class _NavItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final int index;
   final int current;
   final void Function(int) onTap;
-  const _NavItem({
-    required this.icon, required this.label,
-    required this.index, required this.current, required this.onTap,
-  });
-
+  const _NavItem({required this.icon, required this.label, required this.index, required this.current, required this.onTap});
   @override
   Widget build(BuildContext context) {
     final active = index == current;
@@ -1077,18 +922,13 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-              color: active ? const Color(0xFF1565C0) : const Color(0xFFB0BEC5),
-              size: 22,
-            ),
+            Icon(icon, color: active ? const Color(0xFF1565C0) : const Color(0xFFB0BEC5), size: 22),
             const SizedBox(height: 3),
-            Text(label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: active ? FontWeight.w700 : FontWeight.w400,
-                color: active ? const Color(0xFF1565C0) : const Color(0xFFB0BEC5),
-              ),
-            ),
+            Text(label, style: TextStyle(
+              fontSize: 10,
+              fontWeight: active ? FontWeight.w700 : FontWeight.w400,
+              color: active ? const Color(0xFF1565C0) : const Color(0xFFB0BEC5),
+            )),
           ],
         ),
       ),
