@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'firebase_service.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
 import 'home_screen.dart';
@@ -6,7 +7,7 @@ import '/services/biometric_service.dart';
 
 // ─────────────────────────────────────────────
 // Entry point
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────q
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
@@ -126,31 +127,61 @@ class _LoginBodyState extends State<_LoginBody>
 
   Future<void> _submit() async {
     final valid = switch (_mode) {
-      _AuthMode.login         => _loginFormKey.currentState?.validate() ?? false,
-      _AuthMode.register      => _regFormKey.currentState?.validate() ?? false,
+      _AuthMode.login          => _loginFormKey.currentState?.validate() ?? false,
+      _AuthMode.register       => _regFormKey.currentState?.validate() ?? false,
       _AuthMode.forgotPassword => _forgotFormKey.currentState?.validate() ?? false,
     };
     if (!valid) return;
 
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
+
+    AuthResult result;
+
+    switch (_mode) {
+      case _AuthMode.login:
+        result = await FirebaseService.signInWithEmail(
+          email: _emailCtrl.text.trim(),
+          password: _passCtrl.text,
+        );
+        break;
+      case _AuthMode.register:
+        result = await FirebaseService.signUpWithEmail(
+          email:    _email2Ctrl.text.trim(),
+          password: _pass2Ctrl.text,
+          name:     _nameCtrl.text.trim(),
+        );
+        break;
+      case _AuthMode.forgotPassword:
+        result = await FirebaseService.sendPasswordReset(_forgotCtrl.text.trim());
+        if (!mounted) return;
+        setState(() => _isLoading = false);
+        if (result == AuthResult.success) {
+          _showSnack("¡Enlace enviado a tu correo! 📩");
+          _switchMode(_AuthMode.login);
+        } else {
+          _showSnack(result.message);
+        }
+        return;
+    }
+
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (_mode == _AuthMode.forgotPassword) {
-      _showSnack('¡Enlace enviado a tu correo! 📩');
-      _switchMode(_AuthMode.login);
-      return;
+    if (result == AuthResult.success) {
+      // Cargar datos desde la nube
+      await FirebaseService.loadAllFromCloud();
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 600),
+          pageBuilder: (_, __, ___) => const HomeScreen(),
+          transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
+        ),
+      );
+    } else {
+      _showSnack(result.message);
     }
-
-    Navigator.pushReplacement(
-      context,
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 600),
-        pageBuilder: (_, __, ___) => const HomeScreen(),
-        transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
-      ),
-    );
   }
 
   void _showSnack(String msg) {
@@ -435,7 +466,28 @@ class _LoginBodyState extends State<_LoginBody>
           const _Divider(label: 'O continúa con'),
           const SizedBox(height: 16),
 
-          _SocialRow(onTap: (p) => _showSnack('Iniciando con $p...')),
+          _SocialRow(onTap: (p) async {
+                if (p == 'Google') {
+                  setState(() => _isLoading = true);
+                  final result = await FirebaseService.signInWithGoogle();
+                  if (!mounted) return;
+                  setState(() => _isLoading = false);
+                  if (result == AuthResult.success) {
+                    await FirebaseService.loadAllFromCloud();
+                    if (!mounted) return;
+                    Navigator.pushReplacement(context,
+                      PageRouteBuilder(
+                        transitionDuration: const Duration(milliseconds: 600),
+                        pageBuilder: (_, __, ___) => const HomeScreen(),
+                        transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
+                      ));
+                  } else {
+                    _showSnack(result.message);
+                  }
+                } else {
+                  _showSnack('Próximamente: $p');
+                }
+              }),
 
           const SizedBox(height: 24),
           Center(

@@ -7,7 +7,7 @@ import 'notifications_screen.dart';
 import 'profile_screen.dart';
 import 'sounds_screen.dart';
 import 'stats_screen.dart';           // ← NUEVO
-
+import 'assessment_screen.dart';
 // ─────────────────────────────────────────────
 // Modelos de datos locales
 // ─────────────────────────────────────────────
@@ -306,6 +306,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _QuickAction(icon: Icons.self_improvement_rounded, label: 'Respirar',     color: const Color(0xFF26A69A), onTap: _goToBreathing),
       _QuickAction(icon: Icons.music_note_rounded,       label: 'Sonidos',      color: const Color(0xFF6A1B9A), onTap: _goToSounds),
       _QuickAction(icon: Icons.book_rounded,             label: 'Mi\ndiario',   color: const Color(0xFFF57C00), onTap: _goToDiary),
+    _QuickAction(icon: Icons.psychology_rounded, label: 'Tests\nmentales', color: const Color(0xFF7B1FA2),onTap: () => Navigator.push(context,MaterialPageRoute(builder: (_) => const AssessmentScreen())),
+),
     ];
 
     return Padding(
