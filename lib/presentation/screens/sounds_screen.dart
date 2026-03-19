@@ -436,7 +436,7 @@ class _SoundsScreenState extends State<SoundsScreen>
         ),
 
         const SizedBox(height: 20),
-        _buildAssetsInfo(),
+     
       ],
     );
   }
@@ -467,63 +467,6 @@ class _SoundsScreenState extends State<SoundsScreen>
       ),
     );
   }
-
-  Widget _buildAssetsInfo() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Text('📁', style: TextStyle(fontSize: 18)),
-              SizedBox(width: 8),
-              Text('Archivos de audio requeridos',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Agrega estos archivos en assets/sounds/ de tu proyecto:',
-            style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.5)),
-          ),
-          const SizedBox(height: 8),
-          ..._sounds.map((s) => Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              children: [
-                Text(s.emoji, style: const TextStyle(fontSize: 14)),
-                const SizedBox(width: 8),
-                Text(
-                  s.asset.split('/').last,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF64B5F6),
-                    fontFamily: 'monospace',
-                  ),
-                ),
-              ],
-            ),
-          )),
-          const SizedBox(height: 10),
-          Text(
-            '💡 Descarga sonidos gratis en freesound.org o zapsplat.com',
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.white.withOpacity(0.4),
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(msg, style: const TextStyle(color: Colors.white)),

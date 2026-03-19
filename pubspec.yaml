@@ -37,6 +37,7 @@ flutter_launcher_icons:
 flutter:
   uses-material-design: true
   assets:
+    - .env
     - assets/logo.png
     - assets/sounds/rain.mp3
     - assets/sounds/ocean.mp3
